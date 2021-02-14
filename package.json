@@ -1,0 +1,18 @@
+{
+  "name": "FlashCard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Jonathan De Wet",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express-handlebars": "^5.2.0",
+    "handlebars": "^4.7.6",
+    "utimes": "^4.0.3"
+  }
+}
