@@ -1,0 +1,38 @@
+.video {
+    border: 3px solid rgb(100, 100, 100);
+}
+
+main {
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 15vh;
+}
+
+video {
+    height: 9rem;
+    width: 100%;
+    border-radius: 7px;
+}
+
+#question{
+    margin-bottom: 0.5rem;
+}
+
+.next-keep-one-buttons{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+#videoDiv{
+    display: relative;
+}
+
+/* button {
+    margin-right: 1rem;
+    margin-top: 1rem;
+    width: 10rem;
+} */

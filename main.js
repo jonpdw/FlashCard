@@ -1,102 +1,119 @@
-const express = require("express")
-const path = require("path")
-const fs = require("fs")
-const { getValidFiles } = require("./getValidFiles")
-const exphbs = require("express-handlebars")
-const { utimes } = require("utimes")
-const { RandomItemFromArray } = require("./myUtils")
-const e = require("express")
 
-const app = express()
+let question = document.querySelector("#question")
+let answer = document.querySelector("#answer")
+let button = document.querySelector("button")
+let body = document.querySelector("body")
 
-app.use(express.json())
+let numTimesSpacePressed = 0
 
-app.engine('handlebars', exphbs());
-app.set('view engine', 'handlebars');
-
-const port = 5000
-const pathToiCloud = '/Users/jonathan/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/'
-
-app.use(express.static(path.join(__dirname, "content")))
-
-let prevFlashCard = ''
-let newFlashCard = ''
-
-app.get("/flashcards/:folder", async (req, res) => {
-    let folder = req.params.folder
-    let num = parseInt(req.params.num)
-    let pathToFolder = `${pathToiCloud}${folder}`
-    numberChanger = {
-        "zero": 0,
-        "one": 1,
-        "three": 3,
-        "seven": 7,
-        "seventeen": 17,
-        "testing": 0,
-    }
-    let intNum = numberChanger[folder.toLowerCase()]
-    let allValidFiles = await getValidFiles(pathToFolder, intNum)
-
-    if (allValidFiles.length > 0) {
-        if (allValidFiles.length >= 2) {
-            // prevent getting same flashcard twice when using keep
-            do {
-                newFlashCard = RandomItemFromArray(allValidFiles)
-            } while (newFlashCard === prevFlashCard)
-            prevFlashCard = newFlashCard
-
-            let folderAndFileName = path.parse(`${folder}/${newFlashCard}`)
-            res.render('home', { partialAudioPath: `${folder}/${folderAndFileName.name}` })
-        }
+function spacePressed() {
+    if (numTimesSpacePressed === 0) {
+        question.play()
+        numTimesSpacePressed++
+    } else if (numTimesSpacePressed === 1) {
+        question.pause()
+        answer.play()
+        numTimesSpacePressed++
     } else {
-        res.render('noMoreCards')
+        if (answer.paused)
+            answer.play()
+        else
+            answer.pause()
+    }
+}
+
+window.addEventListener('keydown', async (event) => {
+    if (event.key === " ") {
+        spacePressed()
+    }
+    if (event.key === "a") {
+        await sendMovePostRequestToServer("Zero")
+    }
+    if (event.key === "s") {
+        await sendMovePostRequestToServer("One")
+    }
+    if (event.key === "d") {
+        await sendMovePostRequestToServer("Three")
+    }
+    if (event.key === "f") {
+        await sendMovePostRequestToServer("Seven")
+    }
+    if (event.key === "f") {
+        await sendMovePostRequestToServer("17")
+    }
+    if (event.key === "c") {
+        await sendMovePostRequestToServer("Keep")
+    }
+    if (event.key === "t") {
+        await sendMovePostRequestToServer("Trash")
     }
 })
 
-// send audio files that html requests
-app.get("/res/:folder/:filename", async (req, res) => {
-    let requestPath = `${pathToiCloud}${req.params.folder}/${req.params.filename}`
-    // console.log(requestPath);
-    res.sendFile(requestPath)
+function getCurrentFolderFromPageURL() {
+    let endBitOfURL = window.location.pathname // e.g. "/flashcards/Zero"
+    let justFolder = endBitOfURL.split('/')[2]  // e.g. "Zero"
+    return justFolder
+};
 
-})
 
-// move question and answer based on json request
-app.post("/moveFlashcard", async (req, res) => {
-    console.log("moveFlashcard");
+async function sendMovePostRequestToServer(newFlashCardFolderLocation) {
 
-    if (req.body.NewFolder === "Keep") {
-        console.log("Flashcard Kept");
-        res.status(200).send("Moved Files")
-        return
+    let pressedButton = document.querySelector(`#${newFlashCardFolderLocation.toLowerCase()}`)
+    // change background color to light blue 
+    pressedButton.style.background = "rgb(190, 204, 254)"
+    setTimeout(() => {
+        pressedButton.style.background = null
+        window.location.reload();
+    }, 200)
+
+    let partialPathQuestion = document.querySelector("#question-source").src
+    partialPathQuestion = decodeURIComponent(partialPathQuestion.split('/')[5]); // converts http://localhost:5000/res/Testing/[question2]%20[596]-Answer.m4a" into "[html] [465].m4a"
+
+    let partialPathAnswer = document.querySelector("#answer-source").src
+    partialPathAnswer = decodeURIComponent(partialPathAnswer.split('/')[5])
+
+    let headerBody = JSON.stringify({ CurrentFolder: getCurrentFolderFromPageURL(), NewFolder: newFlashCardFolderLocation, QuestionPartialPath: partialPathQuestion, AnswerPartialPath: partialPathAnswer })
+    let headerObjectThing = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: headerBody
     }
+    const rawResponse = await fetch('http://localhost:5000/moveFlashcard', headerObjectThing);
+    const content = await rawResponse.json();
 
-    let currentFilePathQuestion = `${pathToiCloud}${req.body.CurrentFolder}/${req.body.QuestionPartialPath}`
-    let currentFilePathAnswer = `${pathToiCloud}${req.body.CurrentFolder}/${req.body.AnswerPartialPath}`
+    console.log(content);
+}
 
-    let newFilePathQuestion = `${pathToiCloud}${req.body.NewFolder}/${req.body.QuestionPartialPath}`
-    let newFilePathAnswer = `${pathToiCloud}${req.body.NewFolder}/${req.body.AnswerPartialPath}`
-
-    // change date created to now. Copying file doesn't change date created and this is needed when filtering files
-    await utimes(currentFilePathQuestion, { btime: Date.now() })
-    await utimes(currentFilePathAnswer, { btime: Date.now() })
-
-    // move file
-    fs.renameSync(currentFilePathQuestion, newFilePathQuestion)
-    fs.renameSync(currentFilePathAnswer, newFilePathAnswer)
-
-    res.status(200).send("Moved Files")
+let trash = document.querySelector("#trash")
+trash.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("Trash")
 })
 
-app.listen(port, () => { console.log("Application started"); })
+let keep = document.querySelector("#keep")
+keep.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("Keep")
+})
 
+let zero = document.querySelector("#zero")
+zero.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("Zero")
+})
+let one = document.querySelector("#one")
+one.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("One")
+})
 
-
-
-
-
-
-
-
-
-
+let three = document.querySelector("#three")
+three.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("Three")
+})
+let seven = document.querySelector("#seven")
+seven.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("Seven")
+})
+let seventeen = document.querySelector("#seventeen")
+seventeen.addEventListener('click', async () => {
+    await sendMovePostRequestToServer("17")
+})

@@ -1,18 +1,21 @@
 <main>
+    <p>Avalible Flashcards: {{totalAvalibleFlashcards}}/{{totalFlashcards}}</p>
     <p>{{partialAudioPath}}</p>
-    <video class="video" controls="" id="question">
-        <source src="/res/{{partialAudioPath}}.m4a" type="audio/x-m4a" id="question-source">
-    </video>
-    <video class="video" controls="" id="answer">
-        <source src="/res/{{partialAudioPath}}-Answer.m4a" type="audio/x-m4a" id="answer-source">
-
-    </video>
+    <div id="videoDiv">
+        <video class="video" controls="" id="question">
+            <source src="/res/{{partialAudioPath}}.m4a" type="audio/x-m4a" id="question-source">
+        </video>
+        <video class="video" controls="" id="answer">
+            <source src="/res/{{partialAudioPath}}-Answer.m4a" type="audio/x-m4a" id="answer-source">
+        </video>
+    </div>
     <div class="next-keep-one-buttons">
-        <button id="keep">Keep (c)</button>
         <button id="zero">Zero (a)</button>
         <button id="one">One (s)</button>
         <button id="three">Three (d)</button>
         <button id="seven">Seven (f)</button>
         <button id="seventeen">Seventeen (g)</button>
+        <button id="keep">Keep (c)</button>
+        <button id="trash">Trash (t)</button>
     </div>
 </main

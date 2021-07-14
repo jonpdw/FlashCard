@@ -1,0 +1,56 @@
+body {
+    background-color: hsl(105, 0%, 97%);
+    font-family: -apple-system, system-ui, sans-serif;
+}
+
+#id {
+    color: #333333;
+    text-align: center;
+}
+
+main {
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    height: 95vh;
+    border: 2px solid rgb(237, 237, 237);
+    border-radius: 10px;
+}
+
+#topBit{
+    display: flex;
+    justify-content: center;
+}
+
+
+#folderSvg{
+    height: 17px;
+    stroke-width: 1;
+}
+
+#folderText{
+    margin-left: 0.5rem;
+    height: 13px;
+}
+
+video {
+    height: 9rem;
+    width: 100%;
+    border-radius: 7px;
+}
+
+#question {
+    margin-bottom: 0.5rem;
+}
+
+.next-keep-one-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+#videoDiv {
+    display: relative;
+}
